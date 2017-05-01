@@ -1407,24 +1407,24 @@ static void CreateAddressBookAsync(TGAddressBookCreated createdBlock)
     
     CreateAddressBookAsync(^(ABAddressBookRef addressBook, bool denied)
     {
-        if (addressBook == NULL || denied)
-        {
-            [ActionStageInstance() dispatchOnStageQueue:^
-            {
-                [self completeAction:false];
-            }];
-            
-            return;
-        }
-        
-        ABRecordRef person = ABAddressBookGetPersonWithRecordID(addressBook, nativeId);
-        if (person != NULL)
-        {
-            ABRecordSetValue(person, kABPersonFirstNameProperty, (__bridge CFStringRef)changeFirstName, NULL);
-            ABRecordSetValue(person, kABPersonLastNameProperty, (__bridge CFStringRef)changeLastName, NULL);
-            
-            ABAddressBookSave(addressBook, NULL);
-        }
+//        if (addressBook == NULL || denied)
+//        {
+//            [ActionStageInstance() dispatchOnStageQueue:^
+//            {
+//                [self completeAction:false];
+//            }];
+//            
+//            return;
+//        }
+//        
+//        ABRecordRef person = ABAddressBookGetPersonWithRecordID(addressBook, nativeId);
+//        if (person != NULL)
+//        {
+//            ABRecordSetValue(person, kABPersonFirstNameProperty, (__bridge CFStringRef)changeFirstName, NULL);
+//            ABRecordSetValue(person, kABPersonLastNameProperty, (__bridge CFStringRef)changeLastName, NULL);
+//            
+//            ABAddressBookSave(addressBook, NULL);
+//        }
         
         [ActionStageInstance() dispatchOnStageQueue:^
         {   
