@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>aps-environment</key>
-	<string>production</string>
+	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:telegram.me</string>
@@ -11,23 +11,25 @@
 	</array>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.org.telegram.TelegramEnterprise</string>
+		<string>iCloud.$(CFBundleIdentifier)</string>
 	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>
 		<string>CloudDocuments</string>
 	</array>
+	<key>com.apple.developer.in-app-payments</key>
+	<array/>
 	<key>com.apple.developer.siri</key>
 	<true/>
 	<key>com.apple.developer.ubiquity-container-identifiers</key>
 	<array>
-		<string>iCloud.org.telegram.TelegramEnterprise</string>
+		<string>iCloud.$(CFBundleIdentifier)</string>
 	</array>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
-	<string>$(TeamIdentifierPrefix)org.telegram.TelegramEnterprise</string>
+	<string>$(TeamIdentifierPrefix)it.eantropov.TelegramEnterprise</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.org.telegram.TelegramEnterprise</string>
+		<string>group.it.eantropov.TelegramEnterprise</string>
 	</array>
 </dict>
 </plist>
