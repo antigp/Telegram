@@ -13636,7 +13636,7 @@ typedef struct {
 }
 
 - (NSString *)spotlightIndexDomain {
-    return @"org.telegram.Telegram.conversations";
+    return @"it.eantropov.Telegram.conversations";
 }
 
 - (void)clearSpotlightIndex:(void (^)())completion {

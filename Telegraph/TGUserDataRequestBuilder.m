@@ -100,12 +100,25 @@
                     updatedUser.phoneNumberHash = originalUser.phoneNumberHash;
                     updatedUser.userName = originalUser.userName;
                     updatedUser.presence = originalUser.presence;
-                    updatedUser.firstName = originalUser.firstName;
-                    updatedUser.lastName = originalUser.lastName;
+                    if(updatedUser.firstName == nil)
+                        updatedUser.firstName = originalUser.firstName;
+                    else
+                        originalUser.firstName = updatedUser.firstName;
+                    if(updatedUser.lastName == nil)
+                        updatedUser.lastName = originalUser.lastName;
+                    else
+                        originalUser.lastName = updatedUser.lastName;
                     updatedUser.phoneNumber = originalUser.phoneNumber;
-                    updatedUser.phonebookFirstName = originalUser.phonebookFirstName;
-                    updatedUser.phonebookLastName = originalUser.phonebookLastName;
+                    if(updatedUser.phonebookFirstName == nil)
+                        updatedUser.phonebookFirstName = originalUser.phonebookFirstName;
+                    else
+                        originalUser.phonebookFirstName = updatedUser.phonebookFirstName;
+                    if(updatedUser.phonebookLastName == nil)
+                        updatedUser.phonebookLastName = originalUser.phonebookLastName;
+                    else
+                        originalUser.phonebookLastName = updatedUser.phonebookLastName;
                 }
+
                 
                 [updateUsers addObject:updatedUser];
                 [updateUserChanges addObject:[[NSNumber alloc] initWithInt:[updatedUser differenceFromUser:originalUser]]];

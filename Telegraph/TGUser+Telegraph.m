@@ -133,6 +133,7 @@ int extractUserLinkFromUpdate(TLUpdate$updateContactLink *linkUpdate)
     self = [self init];
     if (self != nil)
     {
+        
         int32_t uid = 0;
         NSString *userPhone = nil;
         if ([user isKindOfClass:[TLUser$modernUser class]])
@@ -141,9 +142,10 @@ int extractUserLinkFromUpdate(TLUpdate$updateContactLink *linkUpdate)
             
             uid = concreteUser.n_id;
             self.uid = uid;
+            TGUser *originalUser = [[TGDatabase instance] loadUser:uid];
             self.phoneNumberHash = concreteUser.access_hash;
-            self.firstName = concreteUser.first_name;
-            self.lastName = concreteUser.last_name;
+            self.firstName = originalUser.firstName ?: concreteUser.first_name;
+            self.lastName = originalUser.lastName ?: concreteUser.last_name;
             self.userName = concreteUser.username;
             userPhone = concreteUser.phone;
             extractUserPhoto(concreteUser.photo, self);
@@ -178,14 +180,15 @@ int extractUserLinkFromUpdate(TLUpdate$updateContactLink *linkUpdate)
         }
         
         if (uid != 0 && userPhone.length != 0)
-        {   
+        {
+            TGUser *originalUser = [[TGDatabase instance] loadUser:uid];
             TGContactBinding *binding = [TGDatabaseInstance() contactBindingWithId:self.contactId];
             if (binding != nil)
             {
                 if (uid != TGTelegraphInstance.clientUserId)
                 {
-                    self.phonebookFirstName = binding.firstName;
-                    self.phonebookLastName = binding.lastName;
+                    self.phonebookFirstName = originalUser.phonebookFirstName ?: binding.firstName;
+                    self.phonebookLastName = originalUser.phonebookLastName ?: binding.lastName;
                 }
             }
         }
