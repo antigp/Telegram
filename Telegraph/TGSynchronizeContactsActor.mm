@@ -26,6 +26,8 @@
 #include <algorithm>
 
 #import <CommonCrypto/CommonDigest.h>
+#import "TGTelegramNetworking.h"
+#import "TGImageUtils.h"
 
 #if TARGET_IPHONE_SIMULATOR
 
@@ -638,6 +640,14 @@ static void CreateAddressBookAsync(TGAddressBookCreated createdBlock)
             [self processChangeContactName:uid nativeId:nativeId changeFirstName:firstName changeLastName:lastName];
         else
             [self completeAction:false];
+        
+        return;
+    }
+    else if ([self.path hasSuffix:@"changeAvatarLocal)"]) {
+        int uid = [[options objectForKey:@"uid"] intValue];
+        UIImage *image = [options objectForKey:@"avatar"];
+        
+        [self processCustomAvatarChangeForUID:uid withAvatar:image];
         
         return;
     }
@@ -1461,6 +1471,48 @@ static void CreateAddressBookAsync(TGAddressBookCreated createdBlock)
         }];
     });
 }
+
+- (void) processCustomAvatarChangeForUID:(int)uid withAvatar: (UIImage*)avatar {
+    if(avatar) {
+        if (MIN(avatar.size.width, avatar.size.height) < 160.0f)
+            avatar = TGScaleImageToPixelSize(avatar, CGSizeMake(160, 160));
+        
+        NSData *imageData = UIImageJPEGRepresentation(avatar, 0.6f);
+        TGUser *newUser = [[TGDatabaseInstance() loadUser:uid] copy];
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSString *docsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString *path = [docsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.jpg",[[NSUUID UUID] UUIDString]]];
+        if([fileManager fileExistsAtPath:newUser.photoUrlSmall]) {
+            [fileManager removeItemAtPath:newUser.photoUrlSmall error:nil];
+        }
+        if(![fileManager fileExistsAtPath:path])
+        {
+            [imageData writeToFile:path atomically:YES];
+        }
+        NSURL *url = [NSURL fileURLWithPath:path];
+        newUser.photoUrlSmall = url.absoluteString;
+        newUser.photoUrlBig = url.absoluteString;
+        newUser.photoUrlMedium = url.absoluteString;
+        [TGUserDataRequestBuilder executeUserObjectsUpdate:[[NSArray alloc] initWithObjects:newUser, nil]];
+        [self completeAction:true];
+        return;
+    }
+    else {
+        TGUser *newUser = [[TGDatabaseInstance() loadUser:uid] copy];
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        if([fileManager fileExistsAtPath:newUser.photoUrlSmall]) {
+            [fileManager removeItemAtPath:newUser.photoUrlSmall error:nil];
+        }
+        newUser.photoUrlSmall = nil;
+        newUser.photoUrlBig = nil;
+        newUser.photoUrlMedium = nil;
+        [TGUserDataRequestBuilder executeUserObjectsUpdate:[[NSArray alloc] initWithObjects:newUser, nil]];
+        [self completeAction:true];
+        return;
+    }
+}
+
 
 - (void)processAppendContactPhone:(int)uid nativeId:(int)nativeId newPhone:(NSString *)newPhone
 {

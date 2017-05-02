@@ -73,6 +73,7 @@
 #import "TGSendMessageSignals.h"
 #import <Contacts/Contacts.h>
 #import <AddressBook/AddressBook.h>
+#import "TGMediaAvatarMenuMixin.h"
 
 @interface TGTelegraphUserInfoController () <TGAlertSoundControllerDelegate, TGUserInfoEditingPhoneCollectionItemDelegate, TGPhoneLabelPickerControllerDelegate, TGCreateContactControllerDelegate, TGAddToExistingContactControllerDelegate>
 {
@@ -124,6 +125,8 @@
     
     TGMenuContainerView *_tooltipContainerView;
     NSTimer *_tooltipTimer;
+    
+    TGMediaAvatarMenuMixin *_avatarMixin;
 }
 
 @end
@@ -1545,6 +1548,55 @@ static UIView *_findBackArrow(UIView *view)
     return nil;
 }
 
+- (void) createCustomAvatarSelector{
+    __weak TGTelegraphUserInfoController *weakSelf = self;
+    _avatarMixin = [[TGMediaAvatarMenuMixin alloc] initWithParentController:self hasDeleteButton:[_user.photoUrlSmall hasPrefix:@"file://"]];
+    _avatarMixin.didFinishWithImage = ^(UIImage *image)
+    {
+        __strong TGTelegraphUserInfoController *strongSelf = weakSelf;
+        if (strongSelf == nil)
+            return;
+        [strongSelf updateCustomUserAvatar:image];
+//        [strongSelf _updateGroupProfileImage:image];
+        strongSelf->_avatarMixin = nil;
+    };
+    _avatarMixin.didFinishWithDelete = ^
+    {
+        __strong TGTelegraphUserInfoController *strongSelf = weakSelf;
+        if (strongSelf == nil)
+            return;
+        
+        [strongSelf deleteCustomAvatar];
+        strongSelf->_avatarMixin = nil;
+    };
+    _avatarMixin.didDismiss = ^
+    {
+        __strong TGTelegraphUserInfoController *strongSelf = weakSelf;
+        if (strongSelf == nil)
+            return;
+        
+        strongSelf->_avatarMixin = nil;
+    };
+    [_avatarMixin present];
+}
+
+- (void) updateCustomUserAvatar: (UIImage*) avatar {
+    
+    [ActionStageInstance() dispatchOnStageQueue:^
+     {
+         static int actionId = 0;
+         [ActionStageInstance() requestActor:[NSString stringWithFormat:@"/tg/synchronizeContacts/(%d,%d,changeAvatarLocal)", _uid, actionId++] options:[NSDictionary dictionaryWithObjectsAndKeys:[[NSNumber alloc] initWithInt:_uid], @"uid", avatar, @"avatar", nil] watcher:self];
+     }];
+}
+
+- (void) deleteCustomAvatar {
+    [ActionStageInstance() dispatchOnStageQueue:^
+     {
+         static int actionId = 0;
+         [ActionStageInstance() requestActor:[NSString stringWithFormat:@"/tg/synchronizeContacts/(%d,%d,changeAvatarLocal)", _uid, actionId++] options:[NSDictionary dictionaryWithObjectsAndKeys:[[NSNumber alloc] initWithInt:_uid], @"uid", nil, @"avatar", nil] watcher:self];
+     }];
+}
+
 - (void)actionStageActionRequested:(NSString *)action options:(id)options
 {
     if ([action isEqualToString:@"willForwardMessages"])
@@ -1560,7 +1612,12 @@ static UIView *_findBackArrow(UIView *view)
     }
     if ([action isEqualToString:@"avatarTapped"])
     {
-        [self createAvatarGalleryControllerForPreviewMode:false];
+        if (_editing) {
+            [self createCustomAvatarSelector];
+        }
+        else {
+            [self createAvatarGalleryControllerForPreviewMode:false];
+        }
     }
     else if ([action isEqualToString:@"callTapped"])
     {
@@ -1673,7 +1730,6 @@ static UIView *_findBackArrow(UIView *view)
             }
         });
     }
-    
     [super actionStageResourceDispatched:path resource:resource arguments:arguments];
 }
 
@@ -1763,6 +1819,10 @@ static UIView *_findBackArrow(UIView *view)
             _isUserBlocked = blocked;
             [self _updateUserBlocked];
         });
+    }
+    else if ([path hasSuffix:@"changeAvatarLocal)"]) {
+        TGUser *newUser = [[TGDatabaseInstance() loadUser:_uid] copy];
+        [self.userInfoItem setUser:newUser animated:true];
     }
     
     [super actorCompleted:status path:path result:result];

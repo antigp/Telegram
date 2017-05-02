@@ -117,6 +117,16 @@
                         updatedUser.phonebookLastName = originalUser.phonebookLastName;
                     else
                         originalUser.phonebookLastName = updatedUser.phonebookLastName;
+                    
+                    if([originalUser.photoUrlSmall hasPrefix:@"file://"]) {
+                        updatedUser.photoUrlSmall = originalUser.photoUrlSmall;
+                    }
+                    if([originalUser.photoUrlMedium hasPrefix:@"file://"]) {
+                        updatedUser.photoUrlMedium = originalUser.photoUrlMedium;
+                    }
+                    if([originalUser.photoUrlBig hasPrefix:@"file://"]) {
+                        updatedUser.photoUrlBig = originalUser.photoUrlBig;
+                    }
                 }
 
                 

@@ -148,7 +148,14 @@ int extractUserLinkFromUpdate(TLUpdate$updateContactLink *linkUpdate)
             self.lastName = originalUser.lastName ?: concreteUser.last_name;
             self.userName = concreteUser.username;
             userPhone = concreteUser.phone;
-            extractUserPhoto(concreteUser.photo, self);
+            if(![originalUser.photoUrlSmall hasPrefix:@"file://"] && ![originalUser.photoUrlMedium hasPrefix:@"file://"] && ![originalUser.photoUrlBig hasPrefix:@"file://"]) {
+                extractUserPhoto(concreteUser.photo, self);
+            }
+            else {
+                self.photoUrlSmall = originalUser.photoUrlSmall;
+                self.photoUrlMedium = originalUser.photoUrlMedium;
+                self.photoUrlBig = originalUser.photoUrlBig;
+            }
             self.presence = extractUserPresence(concreteUser.status);
             
             if (concreteUser.flags & (1 << 14))
