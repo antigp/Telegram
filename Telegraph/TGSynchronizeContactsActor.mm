@@ -1452,7 +1452,7 @@ static void CreateAddressBookAsync(TGAddressBookCreated createdBlock)
             [TGContactListRequestBuilder dispatchNewContactList];
             [TGContactListRequestBuilder dispatchNewPhonebook];
             
-            /*NSMutableArray *exportActions = [[NSMutableArray alloc] init];
+            NSMutableArray *exportActions = [[NSMutableArray alloc] init];
             
             for (TGPhoneNumber *phoneNumber in phonebookContact.phoneNumbers)
             {
@@ -1463,9 +1463,10 @@ static void CreateAddressBookAsync(TGAddressBookCreated createdBlock)
             
             if (exportActions.count != 0)
                 [TGDatabaseInstance() storeFutureActions:exportActions];
+            /*
             [ActionStageInstance() requestActor:@"/tg/synchronizeContacts/(removeAndExport)" options:[[NSDictionary alloc] initWithObjectsAndKeys:[[NSNumber alloc] initWithBool:false], @"signalSynchronizationCompleted", nil] watcher:TGTelegraphInstance];*/
             
-            [self completeAction:true];
+            [self processRemoveAndExportActions];
             
             [[TGSynchronizeContactsManager instance] addressBookChanged];
         }];
